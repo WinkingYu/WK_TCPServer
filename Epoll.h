@@ -3,6 +3,7 @@
 #include <sys/epoll.h>
 
 #include "Listen.h"
+#include "Transmit.h"
 
 class Epoll
 {
@@ -63,9 +64,9 @@ public:
 		return Wait(&event, 1, 1000);
 	}
 
-	int TransmitWait(epoll_event* _event)
+	int TransmitWait(epoll_event* _event, int _maxEvents, int _time)
 	{
-		return Wait(_event, TRANSMIT_EPOLL_EVENTS_NUM, 1000);
+		return Wait(_event, _maxEvents, _time);
 	}
 
 private:
@@ -109,7 +110,7 @@ public:
 
 	virtual ~EpollListen()
 	{
-
+		
 	}
 
 private:
@@ -158,5 +159,58 @@ private:
 
 private:
 	shared_ptr<Epoll> pEpoll_;
+};
+
+class EpollTransmit :public Transmit
+{
+	const int TRANSMIT_EPOLL_EVENTS_NUM = 10;
+public:
+	EpollTransmit()
+	{
+		for (int i = 0; i < ThreadCount_; ++i)
+			pEpollVec_[i] = make_shared<Epoll>(TRANSMIT_EPOLL_EVENTS_NUM);
+	}
+
+	virtual  ~EpollTransmit()
+	{
+	}
+private:
+	virtual void TransmitFun(int _index)
+	{
+		LOGI("Epoll %02d Transmit Thread Start", _index);
+
+		epoll_event transmitEvents[TRANSMIT_EPOLL_EVENTS_NUM];
+
+		while (IsContinue_)
+		{
+			int eventNum = pEpollVec_[_index]->TransmitWait(transmitEvents, TRANSMIT_EPOLL_EVENTS_NUM, 1000);
+
+			for (int i = 0; i < eventNum; ++i)
+			{
+				int transmitSocket = transmitEvents[i].data.fd;
+
+				if ((transmitEvents[i].events & EPOLLERR) || (transmitEvents[i].events & EPOLLHUP) || (transmitEvents[i].events & EPOLLRDHUP))
+				{
+					ClientDisconnect(transmitSocket);
+					continue;
+				}
+
+				if (transmitEvents[i].events & EPOLLOUT)
+				{
+					ClientSendData(transmitSocket);
+				}
+
+				if (transmitEvents[i].events & EPOLLIN)
+				{
+					ClientRecvData(transmitSocket);
+				}
+			}// end of for
+		}//end of while
+
+		LOGI("Epoll %02d Transmit Thread Exit", _index);
+	}
+
+private:
+	vector<shared_ptr<Epoll>> pEpollVec_;
 };
 

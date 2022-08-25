@@ -81,6 +81,7 @@
     <ClInclude Include="Epoll.h" />
     <ClInclude Include="Listen.h" />
     <ClInclude Include="Mediator.h" />
+    <ClInclude Include="Transmit.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

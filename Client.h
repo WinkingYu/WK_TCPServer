@@ -7,11 +7,19 @@
 #include <fstream>
 #include <map>
 
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
+
 #include "../WK_BASE/STL.h"
 #include "../WK_BASE/Log.h"
 
 class Client
 {
+	static const size_t SOCKET_BUF_SIZE = 4096;
 public:
 	Client(Client const&) = delete;
 	Client(Client&&) = delete;
@@ -80,6 +88,81 @@ public:
 		IsDisconnected_ = true;
 	}
 
+	size_t RecvData()
+	{
+		char* buf = new char[SOCKET_BUF_SIZE];
+		memset(buf, 0, SOCKET_BUF_SIZE);
+
+		size_t recvRet(0), recvCount(0);
+
+		while ((recvRet = recv(socket_, buf, SOCKET_BUF_SIZE, 0)) > 0)
+		{
+			RecvPipe_.Push(buf, recvRet);
+
+			recvCount += recvRet;
+
+			memset(buf, 0, SOCKET_BUF_SIZE);
+		}
+
+		delete[] buf;
+
+		if (recvRet == 0)
+		{
+			Disconnect();
+		}
+		else if (recvRet == -1 && errno != EAGAIN)
+		{
+			LOGE("Recv Fr %d Socket Error:(%d)%s", socket_, errno, strerror(errno));
+
+			Disconnect();
+		}
+		else if (recvCount > 0)
+		{
+			LOGI("Recv Fr %d Socket Count %d Bytes", socket_, recvCount);
+		}
+
+		return recvCount;
+	}
+
+	size_t SendData()
+	{
+		char* buf = new char[SOCKET_BUF_SIZE];
+
+		int sendRet(0), sendCount(0);
+		size_t popLen(0);
+
+		while (!SendPipe_.IsEmpty())
+		{
+			memset(buf, 0, SOCKET_BUF_SIZE);
+			popLen = SendPipe_.Pop(buf, SOCKET_BUF_SIZE);
+
+			if (popLen > 0 && socket_ > 0 && CheckSocket())
+			{
+				sendRet = send(socket_, buf, popLen, 0);
+
+				if (sendRet > 0)
+				{
+					LOGI("Send To %d Socket %d Bytes", socket_, sendRet);
+					sendCount += sendRet;
+				}
+				else if (errno != EAGAIN)
+				{
+					LOGE("Send To %d Socket Error:(%d)%s", socket_, errno, strerror(errno));
+					Disconnect();
+
+					break;
+				}
+			}
+		}
+
+		delete[] buf;
+
+		if (sendCount > 0)
+			LOGI("Send To %d Socket Count %d Bytes", socket_, sendCount);
+
+		return sendCount;
+	}
+
 	bool IsDisconnect()
 	{
 		return IsDisconnected_;
@@ -93,6 +176,25 @@ public:
 	long ConnectedTime()
 	{
 		return time(0) - ConnectTime_;
+	}
+
+private:
+	bool CheckSocket()
+	{
+		bool result(false);
+
+		if (socket_ <= 0)
+			return result;
+
+		struct tcp_info info;
+		int len = sizeof(info);
+
+		memset(&info, 0, sizeof(info));
+		getsockopt(socket_, IPPROTO_TCP, TCP_INFO, &info, (socklen_t*)&len);
+
+		result = (info.tcpi_state == 1);
+
+		return result;
 	}
 
 private:
@@ -185,6 +287,22 @@ public:
 	void ClientDisconnect(int _socket)
 	{
 		DelClient(_socket);
+	}
+
+	void ClientRecvData(int _socket)
+	{
+		PClient client = GetClient(_socket);
+
+		if (client != nullptr)
+			client->RecvData();
+	}
+
+	void ClientSendData(int _socket)
+	{
+		PClient client = GetClient(_socket);
+
+		if (client != nullptr)
+			client->SendData();
 	}
 
 	void CheckClient()
