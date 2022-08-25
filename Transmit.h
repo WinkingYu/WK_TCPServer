@@ -2,15 +2,17 @@
 
 #include <vector>
 
-#include "Mediator.h"
-
-extern class Mediator;
+class Mediator;
 
 class Transmit
 {
 	static const size_t SOCKET_BUF_SIZE = 4096;
 public:
-	Transmit() = default;
+	Transmit(shared_ptr<Mediator> _pMediator)
+		:pMediator_(_pMediator)
+	{
+	};
+
 	virtual ~Transmit() = default;
 
 public:
@@ -35,24 +37,19 @@ public:
 		ThreadVec_.clear();
 	}
 
-	void SetMediator(shared_ptr<Mediator> _pMediator)
-	{
-		pMediator_ = _pMediator;
-	}
-
 	void ClientDisconnect(int _socket)
 	{
-		pMediator_->ClientDisconnect(_socket);
+		//pMediator_->ClientDisconnect(_socket);
 	}
 
 	void ClientRecvData(int _socket)
 	{
-		pMediator_->ClientRecvData(_socket);
+		//pMediator_->ClientRecvData(_socket);
 	}
 
 	void ClientSendData(int _socket)
 	{
-		pMediator_->ClientSendData(_socket);
+		//pMediator_->ClientSendData(_socket);
 	}
 
 private:

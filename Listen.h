@@ -13,9 +13,6 @@
 
 #include "../WK_BASE/Log.h"
 
-//#include "Mediator.h"
-
-
 class ListenSocket
 {
 public:
@@ -82,12 +79,17 @@ private:
 	int ListenSocket_;
 };
 
+
 class Mediator;
 
 class Listen
 {
 public:
-	Listen() = default;
+	Listen(shared_ptr<Mediator> _pMediator)
+		:pMediator_(_pMediator)
+	{
+
+	}
 	virtual ~Listen() = default;
 
 	void Start(const char* _IP, uint16_t _port)
@@ -104,12 +106,7 @@ public:
 
 	void ClientConnect(int _socket, int _ip, uint16_t _port)
 	{
-		pMediator_->ClientConnect(_socket, _ip, _port);
-	}
-
-	void SetMediator(shared_ptr<Mediator> _pMediator)
-	{
-		pMediator_ = _pMediator;
+		//pMediator_->ClientConnect(_socket, _ip, _port);
 	}
 
 protected:

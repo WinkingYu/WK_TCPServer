@@ -33,15 +33,8 @@ int main()
 
     shared_ptr<Mediator> pMediator = make_shared<Mediator>();
     shared_ptr<ClientManager> pClientManager = make_shared<ClientManager>();
-    shared_ptr<EpollListen> pListen = make_shared<EpollListen>();
-    shared_ptr<EpollTransmit> pTransmit = make_shared<EpollTransmit>();
-
-    pMediator->SetClientManager(pClientManager);
-    pMediator->SetListen(pListen);
-    pMediator->SetTransmit(pTransmit);
-
-    pListen->SetMediator(pMediator);
-    pTransmit->SetMediator(pMediator);
+    shared_ptr<EpollListen> pListen = make_shared<EpollListen>(pMediator);
+    shared_ptr<EpollTransmit> pTransmit = make_shared<EpollTransmit>(pMediator);
 
     pListen->Start("0.0.0.0", 8090);
     pTransmit->Start(5);

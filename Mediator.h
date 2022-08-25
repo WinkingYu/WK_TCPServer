@@ -58,5 +58,5 @@ private:
 	shared_ptr<Transmit> pTransmit_;
 };
 
-using PMediator = shared_ptr<Mediator>;
+//using PMediator = shared_ptr<Mediator>;
 

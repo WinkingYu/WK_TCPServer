@@ -102,7 +102,8 @@ class EpollListen :public Listen
 {
 	const int SOCKET_BUF_SIZE = 4096;
 public:
-	EpollListen()
+	EpollListen(shared_ptr<Mediator> _pMediator)
+		:Listen(_pMediator)
 	{
 		pEpoll_ = make_shared<Epoll>(1);
 
@@ -161,11 +162,14 @@ private:
 	shared_ptr<Epoll> pEpoll_;
 };
 
+class Mediator;
+
 class EpollTransmit :public Transmit
 {
 	const int TRANSMIT_EPOLL_EVENTS_NUM = 10;
 public:
-	EpollTransmit()
+	EpollTransmit(shared_ptr<Mediator> _pMediator)
+		:Transmit(_pMediator)
 	{
 		for (int i = 0; i < ThreadCount_; ++i)
 			pEpollVec_[i] = make_shared<Epoll>(TRANSMIT_EPOLL_EVENTS_NUM);
