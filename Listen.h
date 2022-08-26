@@ -85,24 +85,11 @@ private:
 class Listen
 {
 public:
-	Listen(shared_ptr<Mediator> _pMediator)
-		:pMediator_(_pMediator)
-	{
-
-	}
+	Listen(shared_ptr<Mediator> _pMediator);
 	virtual ~Listen() = default;
 
-	void Start(const char* _IP, uint16_t _port)
-	{
-		IsContinue_ = true;
-		pListenSocket_ = make_shared<ListenSocket>(_IP, _port);
-		pListenThread_ = make_shared<thread>(bind(&Listen::ListenThreadFun, this));
-	}
-
-	void Terminate()
-	{
-		IsContinue_ = false;
-	}
+	void Start(const char* _IP, uint16_t _port);
+	void Terminate();
 
 	void ClientConnect(int _socket, int _ip, uint16_t _port);
 

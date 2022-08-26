@@ -1,5 +1,79 @@
 #include "Epoll.h"
 
+Epoll::Epoll(int _size)
+{
+	fd = epoll_create(_size);
+}
+
+Epoll::~Epoll()
+{
+	close(fd);
+}
+
+void Epoll::RegRecv(int _socket)
+{
+	epoll_event event;
+
+	event.data.fd = _socket;
+	event.events = EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLERR | EPOLLHUP;
+
+	int ret = epoll_ctl(fd, EPOLL_CTL_ADD, _socket, &event);
+}
+
+void Epoll::RegSend(int _socket)
+{
+	epoll_event event;
+
+	event.data.fd = _socket;
+	event.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP | EPOLLERR | EPOLLHUP;
+
+	epoll_ctl(fd, EPOLL_CTL_MOD, _socket, &event);
+}
+
+void Epoll::RegCancel(int _socket)
+{
+	epoll_event event;
+
+	epoll_ctl(fd, EPOLL_CTL_DEL, _socket, &event);
+}
+
+void Epoll::RegLinsten(int _socket)
+{
+	epoll_event regEvent;
+
+	regEvent.data.fd = _socket;
+	regEvent.events = EPOLLIN;
+
+	epoll_ctl(fd, EPOLL_CTL_ADD, _socket, &regEvent);
+}
+
+int Epoll::ListenWait(int _socket)
+{
+	epoll_event event;
+
+	event.data.fd = _socket;
+	event.events = EPOLLIN;
+
+	return epoll_wait(fd, &event, 1, 1000);
+}
+
+int Epoll::TransmitWait(epoll_event* _event, int _maxEvents, int _time)
+{
+	return epoll_wait(fd, _event, _maxEvents, _time);
+}
+
+EpollListen::EpollListen(shared_ptr<Mediator> _pMediator)
+	:Listen(_pMediator)
+{
+	pEpoll_ = make_shared<Epoll>(1);
+
+}
+
+EpollListen::~EpollListen()
+{
+
+}
+
 void EpollListen::ClientBind(int _socket)
 {
 	pMediator_->ClientBind(_socket);
@@ -54,6 +128,31 @@ void EpollListen::ListenThreadFun()
 
 	LOGI("Listen Exit");
 
+}
+
+EpollTransmit::EpollTransmit(shared_ptr<Mediator> _pMediator)
+	:Transmit(_pMediator)
+{
+
+}
+
+EpollTransmit::~EpollTransmit()
+{
+
+}
+
+void EpollTransmit::Start(int _num)
+{
+	for (size_t i = 0; i < _num; ++i)
+		pEpollVec_.push_back(make_shared<Epoll>(TRANSMIT_EPOLL_EVENTS_NUM));
+
+	Transmit::Start(_num);
+}
+
+void EpollTransmit::Terminate()
+{
+	Transmit::Terminate();
+	pEpollVec_.clear();
 }
 
 void EpollTransmit::ClientBind(int _socket)
