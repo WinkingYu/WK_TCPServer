@@ -41,12 +41,12 @@ int main()
     pMediator->SetTransmit(pTransmit);
 
     pListen->Start("0.0.0.0", 8090);
-   // pTransmit->Start(5);
+    pTransmit->Start(5);
 
     while (!g_shut_server)
         sleep(1);
 
-   // pTransmit->Terminate();
+    pTransmit->Terminate();
     pListen->Terminate();
 
 

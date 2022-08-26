@@ -106,6 +106,8 @@ public:
 
 	void ClientConnect(int _socket, int _ip, uint16_t _port);
 
+	virtual void ClientBind(int _socket) = 0;
+
 protected:
 	shared_ptr<ListenSocket> pListenSocket_;
 	atomic<bool> IsContinue_;

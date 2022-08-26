@@ -84,8 +84,10 @@
     <ClInclude Include="Transmit.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Epoll.cpp" />
     <ClCompile Include="Listen.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Mediator.cpp" />
     <ClCompile Include="Transmit.cpp" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

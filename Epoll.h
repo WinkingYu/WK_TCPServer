@@ -34,7 +34,7 @@ public:
 		event.data.fd = _socket;
 		event.events = EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLERR | EPOLLHUP;
 
-		Reg(EPOLL_CTL_ADD, _socket, &event);
+		epoll_ctl(fd, EPOLL_CTL_MOD, _socket, &event);
 	}
 
 	void RegSend(int _socket)
@@ -54,6 +54,16 @@ public:
 		epoll_ctl(fd, EPOLL_CTL_DEL, _socket, &event);
 	}
 
+	void RegLinsten(int _socket)
+	{
+		epoll_event regEvent;
+
+		regEvent.data.fd = _socket;
+		regEvent.events = EPOLLIN;
+
+		epoll_ctl(fd, EPOLL_CTL_ADD, _socket, &regEvent);
+	}
+
 	int ListenWait(int _socket)
 	{
 		epoll_event event;
@@ -61,12 +71,12 @@ public:
 		event.data.fd = _socket;
 		event.events = EPOLLIN;
 
-		return Wait(&event, 1, 1000);
+		return epoll_wait(fd, &event, 1, 1000);
 	}
 
 	int TransmitWait(epoll_event* _event, int _maxEvents, int _time)
 	{
-		return Wait(_event, _maxEvents, _time);
+		return epoll_wait(fd, _event, _maxEvents, _time);
 	}
 
 private:
@@ -114,49 +124,10 @@ public:
 
 	}
 
+	void ClientBind(int _socket) override;
+
 private:
-	virtual void ListenThreadFun() override
-	{
-		int socket = pListenSocket_->GetSocket();
-		while (IsContinue_)
-		{
-			if (pEpoll_->ListenWait(socket) > 0)
-			{
-				sockaddr_in clientAddr;
-				bzero(&clientAddr, sizeof(sockaddr_in));
-				socklen_t AddrLen = sizeof(clientAddr);
-
-				int clientSocket = accept(socket, (sockaddr*)&clientAddr, &AddrLen);
-
-				if (clientSocket > 0)
-				{
-					int flag;
-					flag = fcntl(clientSocket, F_GETFL);
-					fcntl(clientSocket, F_SETFL, flag | O_NONBLOCK);
-
-					int BufSize = SOCKET_BUF_SIZE;
-					if (setsockopt(clientSocket, SOL_SOCKET, SO_RCVBUF, (char*)&BufSize, sizeof(int)) != 0)
-					{
-						LOGE("Set RCVBUF Error");
-					}
-
-					if (setsockopt(clientSocket, SOL_SOCKET, SO_SNDBUF, (char*)&BufSize, sizeof(int)) != 0)
-					{
-						LOGE("Set SNDBUF Error");
-					}
-
-					ClientConnect(clientSocket, clientAddr.sin_addr.s_addr, ntohs(clientAddr.sin_port));
-					LOGI("New Connect(%d) %s:%u", clientSocket, inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
-				}
-				else
-				{
-					close(clientSocket);
-					LOGE("Accept Error:(%d)%s !", errno, strerror(errno));
-				}
-			}
-		}
-		
-	}
+	void ListenThreadFun() override;
 
 private:
 	shared_ptr<Epoll> pEpoll_;
@@ -164,53 +135,37 @@ private:
 
 class EpollTransmit :public Transmit
 {
-	const int TRANSMIT_EPOLL_EVENTS_NUM = 10;
+	const int TRANSMIT_EPOLL_EVENTS_NUM = 5;
 public:
 	EpollTransmit(shared_ptr<Mediator> _pMediator)
 		:Transmit(_pMediator)
 	{
-		for (int i = 0; i < ThreadCount_; ++i)
-			pEpollVec_[i] = make_shared<Epoll>(TRANSMIT_EPOLL_EVENTS_NUM);
+		
 	}
 
 	virtual  ~EpollTransmit()
 	{
+		
 	}
-private:
-	virtual void TransmitFun(int _index)
+
+	void Start(int _num)
 	{
-		LOGI("Epoll %02d Transmit Thread Start", _index);
+		for (size_t i = 0; i < _num; ++i)
+			pEpollVec_.push_back(make_shared<Epoll>(TRANSMIT_EPOLL_EVENTS_NUM));
 
-		epoll_event transmitEvents[TRANSMIT_EPOLL_EVENTS_NUM];
-
-		while (IsContinue_)
-		{
-			int eventNum = pEpollVec_[_index]->TransmitWait(transmitEvents, TRANSMIT_EPOLL_EVENTS_NUM, 1000);
-
-			for (int i = 0; i < eventNum; ++i)
-			{
-				int transmitSocket = transmitEvents[i].data.fd;
-
-				if ((transmitEvents[i].events & EPOLLERR) || (transmitEvents[i].events & EPOLLHUP) || (transmitEvents[i].events & EPOLLRDHUP))
-				{
-					ClientDisconnect(transmitSocket);
-					continue;
-				}
-
-				if (transmitEvents[i].events & EPOLLOUT)
-				{
-					ClientSendData(transmitSocket);
-				}
-
-				if (transmitEvents[i].events & EPOLLIN)
-				{
-					ClientRecvData(transmitSocket);
-				}
-			}// end of for
-		}//end of while
-
-		LOGI("Epoll %02d Transmit Thread Exit", _index);
+		Transmit::Start(_num);
 	}
+
+	void Terminate()
+	{
+		Transmit::Terminate();
+		pEpollVec_.clear();
+	}
+
+	void ClientBind(int _socket) override;
+
+private:
+	void TransmitFun(int _index) override;
 
 private:
 	vector<shared_ptr<Epoll>> pEpollVec_;

@@ -54,7 +54,9 @@ public:
 		pClientManager_->ClientSendData(_socket);
 	}
 
+	void ClientBind(int _socket);
 
+	
 private:
 	shared_ptr<ClientManager> pClientManager_;
 	shared_ptr<Listen> pListen_;
