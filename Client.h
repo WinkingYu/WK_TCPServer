@@ -215,6 +215,8 @@ private:
 
 using PClient = std::shared_ptr<Client>;
 
+class Mediator;
+
 class ClientManager
 {
 	const int INACTIVE_TIME_OUT = 180;
@@ -226,8 +228,9 @@ public:
 	ClientManager& operator=(ClientManager&&) = delete;
 
 public:
-	ClientManager()
+	ClientManager(shared_ptr<Mediator> _pMediator)
 		:IsContinue_(true)
+		, pMediator_(_pMediator)
 		, CheckThread_(new thread(bind(&ClientManager::CheckThreadFun, this)))
 	{
 
@@ -356,6 +359,8 @@ private:
 	std::atomic<bool> IsContinue_;
 
 	std::map<int, PClient> ClientMap_;
+
+	shared_ptr<Mediator> pMediator_;
 
 	std::unique_ptr<std::thread> CheckThread_;
 	std::mutex CheckThreadMutex_;

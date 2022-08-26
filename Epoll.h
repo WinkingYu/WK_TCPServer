@@ -111,7 +111,7 @@ public:
 
 	virtual ~EpollListen()
 	{
-		
+
 	}
 
 private:
@@ -161,8 +161,6 @@ private:
 private:
 	shared_ptr<Epoll> pEpoll_;
 };
-
-class Mediator;
 
 class EpollTransmit :public Transmit
 {

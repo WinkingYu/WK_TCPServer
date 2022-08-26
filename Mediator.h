@@ -4,6 +4,9 @@
 #include "Listen.h"
 #include "Transmit.h"
 
+class Transmit;
+class Listen;
+
 class Mediator
 {
 public:

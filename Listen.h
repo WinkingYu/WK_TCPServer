@@ -13,6 +13,8 @@
 
 #include "../WK_BASE/Log.h"
 
+#include "Mediator.h"
+
 class ListenSocket
 {
 public:
@@ -80,8 +82,6 @@ private:
 };
 
 
-class Mediator;
-
 class Listen
 {
 public:
@@ -104,10 +104,7 @@ public:
 		IsContinue_ = false;
 	}
 
-	void ClientConnect(int _socket, int _ip, uint16_t _port)
-	{
-		//pMediator_->ClientConnect(_socket, _ip, _port);
-	}
+	void ClientConnect(int _socket, int _ip, uint16_t _port);
 
 protected:
 	shared_ptr<ListenSocket> pListenSocket_;

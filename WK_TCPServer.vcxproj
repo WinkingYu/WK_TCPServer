@@ -84,9 +84,22 @@
     <ClInclude Include="Transmit.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Listen.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Transmit.cpp" />
   </ItemGroup>
-  <ItemDefinitionGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+    </ClCompile>
+    <Link>
+      <ShowProgress>true</ShowProgress>
+      <LibraryDependencies>%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalDependencies>-lpthread;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

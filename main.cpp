@@ -32,17 +32,21 @@ int main()
     LOGI("TCP Server Start");
 
     shared_ptr<Mediator> pMediator = make_shared<Mediator>();
-    shared_ptr<ClientManager> pClientManager = make_shared<ClientManager>();
+    shared_ptr<ClientManager> pClientManager = make_shared<ClientManager>(pMediator);
     shared_ptr<EpollListen> pListen = make_shared<EpollListen>(pMediator);
     shared_ptr<EpollTransmit> pTransmit = make_shared<EpollTransmit>(pMediator);
 
+    pMediator->SetClientManager(pClientManager);
+    pMediator->SetListen(pListen);
+    pMediator->SetTransmit(pTransmit);
+
     pListen->Start("0.0.0.0", 8090);
-    pTransmit->Start(5);
+   // pTransmit->Start(5);
 
     while (!g_shut_server)
         sleep(1);
 
-    pTransmit->Terminate();
+   // pTransmit->Terminate();
     pListen->Terminate();
 
 
