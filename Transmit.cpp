@@ -7,7 +7,7 @@ void Transmit::Start(int _num)
 
 	ThreadCount_ = _num;
 
-	for (int i = 0; i < ThreadCount_; ++i)
+	for (size_t i = 0; i < ThreadCount_; ++i)
 	{
 		shared_ptr<thread> pThread = make_shared<thread>(bind(&Transmit::TransmitFun, this, i));
 		ThreadVec_.push_back(pThread);

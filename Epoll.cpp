@@ -84,13 +84,11 @@ void EpollTransmit::TransmitFun(int _index)
 
 			if (transmitEvents[i].events & EPOLLOUT)
 			{
-				LOGI("%d socket SendData", transmitSocket);
 				ClientSendData(transmitSocket);
 			}
 
 			if (transmitEvents[i].events & EPOLLIN)
 			{
-				LOGI("%d socket recvData", transmitSocket);
 				ClientRecvData(transmitSocket);
 			}
 		}// end of for

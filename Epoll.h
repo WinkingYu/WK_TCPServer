@@ -34,7 +34,8 @@ public:
 		event.data.fd = _socket;
 		event.events = EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLERR | EPOLLHUP;
 
-		epoll_ctl(fd, EPOLL_CTL_MOD, _socket, &event);
+		int ret = epoll_ctl(fd, EPOLL_CTL_ADD, _socket, &event);
+		LOGI("ret = %d", ret);
 	}
 
 	void RegSend(int _socket)
