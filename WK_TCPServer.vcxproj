@@ -81,6 +81,7 @@
     <ClInclude Include="Epoll.h" />
     <ClInclude Include="Listen.h" />
     <ClInclude Include="Mediator.h" />
+    <ClInclude Include="Process.h" />
     <ClInclude Include="Transmit.h" />
   </ItemGroup>
   <ItemGroup>
@@ -88,6 +89,7 @@
     <ClCompile Include="Listen.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mediator.cpp" />
+    <ClCompile Include="Process.cpp" />
     <ClCompile Include="Transmit.cpp" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
