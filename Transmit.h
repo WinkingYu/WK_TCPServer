@@ -26,6 +26,7 @@ public:
 	void ClientSendData(int _socket);
 
 	virtual void ClientBind(int _socket) = 0;
+	virtual void ClientBindSend(int _socket) = 0;
 
 private:
 	virtual void TransmitFun(int _index) = 0;

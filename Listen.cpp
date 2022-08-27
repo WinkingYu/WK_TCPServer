@@ -44,7 +44,7 @@ ListenSocket::ListenSocket(const char* _ip, uint16_t _port)
 
 }
 
-virtual ListenSocket::~ListenSocket()
+ListenSocket::~ListenSocket()
 {
 	if (ListenSocket_)
 		shutdown(ListenSocket_, SHUT_RDWR);

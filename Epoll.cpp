@@ -17,7 +17,7 @@ void Epoll::RegRecv(int _socket)
 	event.data.fd = _socket;
 	event.events = EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLERR | EPOLLHUP;
 
-	int ret = epoll_ctl(fd, EPOLL_CTL_ADD, _socket, &event);
+	epoll_ctl(fd, EPOLL_CTL_ADD, _socket, &event);
 }
 
 void Epoll::RegSend(int _socket)
@@ -157,8 +157,18 @@ void EpollTransmit::Terminate()
 
 void EpollTransmit::ClientBind(int _socket)
 {
+	LOGI(__FUNCTION__);
+
 	int index = _socket % ThreadCount_;
 	pEpollVec_[index]->RegRecv(_socket);
+}
+
+void EpollTransmit::ClientBindSend(int _socket)
+{
+	LOGI(__FUNCTION__);
+
+	int index = _socket % ThreadCount_;
+	pEpollVec_[index]->RegSend(_socket);
 }
 
 void EpollTransmit::TransmitFun(int _index)
@@ -177,17 +187,20 @@ void EpollTransmit::TransmitFun(int _index)
 
 			if ((transmitEvents[i].events & EPOLLERR) || (transmitEvents[i].events & EPOLLHUP) || (transmitEvents[i].events & EPOLLRDHUP))
 			{
+				LOGI("%d Scoekt Disconnect", transmitSocket);
 				ClientDisconnect(transmitSocket);
 				continue;
 			}
 
 			if (transmitEvents[i].events & EPOLLOUT)
 			{
+				LOGI("%d Scoekt Send Data", transmitSocket);
 				ClientSendData(transmitSocket);
 			}
 
 			if (transmitEvents[i].events & EPOLLIN)
 			{
+				LOGI("%d Scoekt Recv Data", transmitSocket);
 				ClientRecvData(transmitSocket);
 			}
 		}// end of for

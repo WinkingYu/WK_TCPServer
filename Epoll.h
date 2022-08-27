@@ -81,6 +81,7 @@ public:
 	void Terminate();
 
 	void ClientBind(int _socket) override;
+	void ClientBindSend(int _socket) override;
 
 private:
 	void TransmitFun(int _index) override;

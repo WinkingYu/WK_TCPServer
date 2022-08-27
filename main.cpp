@@ -9,6 +9,7 @@
 #include "Mediator.h"
 #include "Client.h"
 #include "Epoll.h"
+#include "Process.h"
 
 using namespace std;
 
@@ -35,10 +36,12 @@ int main()
     shared_ptr<ClientManager> pClientManager = make_shared<ClientManager>(pMediator);
     shared_ptr<EpollListen> pListen = make_shared<EpollListen>(pMediator);
     shared_ptr<EpollTransmit> pTransmit = make_shared<EpollTransmit>(pMediator);
+    shared_ptr<Process> pProcess = make_shared<Process>(pMediator);
 
     pMediator->SetClientManager(pClientManager);
     pMediator->SetListen(pListen);
     pMediator->SetTransmit(pTransmit);
+    pMediator->SetProcess(pProcess);
 
     pListen->Start("0.0.0.0", 8090);
     pTransmit->Start(5);
@@ -52,7 +55,7 @@ int main()
 
     LOGI("TCP Sever End");
 
-    sleep(1);
+    sleep(2);
 
 	return 0;
 }

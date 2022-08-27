@@ -95,19 +95,25 @@ public:
 
 		size_t recvRet(0), recvCount(0);
 
-		while ((recvRet = recv(socket_, buf, SOCKET_BUF_SIZE, 0)) > 0)
+		do
 		{
-			RecvPipe_.Push(buf, recvRet);
+			recvRet = recv(socket_, buf, SOCKET_BUF_SIZE, 0);
 
-			recvCount += recvRet;
+			if (recvRet > 0)
+			{
+				RecvPipe_.Push(buf, recvRet);
+				recvCount += recvRet;
+			}
 
 			memset(buf, 0, SOCKET_BUF_SIZE);
 		}
+		while (recvRet > 0);
 
 		delete[] buf;
 
 		if (recvRet == 0)
 		{
+			LOGI("%d Socket Disconnect", socket_);
 			Disconnect();
 		}
 		else if (recvRet == -1 && errno != EAGAIN)
@@ -243,7 +249,7 @@ public:
 public:
 	PClient GetClient(int _socket)
 	{
-		PClient client(nullptr);
+		PClient client{ nullptr };
 
 		auto it = ClientMap_.find(_socket);
 
@@ -254,7 +260,7 @@ public:
 
 		return client;
 	}
-	
+
 	void AddClient(int _socket, PClient _client)
 	{
 		DelClient(_socket);
@@ -285,6 +291,8 @@ public:
 		}
 
 		client->Connect(_IP, _port);
+
+		AddClient(_socket, client);
 	}
 
 	void ClientDisconnect(int _socket)
