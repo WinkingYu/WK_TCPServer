@@ -25,7 +25,7 @@ public:
 	void ClientRecvData(int _socket);
 	void ClientSendData(int _socket);
 
-	virtual void ClientBind(int _socket) = 0;
+	virtual void ClientBindRecv(int _socket) = 0;
 	virtual void ClientBindSend(int _socket) = 0;
 
 private:

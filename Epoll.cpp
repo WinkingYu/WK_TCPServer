@@ -74,9 +74,9 @@ EpollListen::~EpollListen()
 
 }
 
-void EpollListen::ClientBind(int _socket)
+void EpollListen::ClientBindRecv(int _socket)
 {
-	pMediator_->ClientBind(_socket);
+	pMediator_->ClientBindRecv(_socket);
 }
 
 void EpollListen::ListenThreadFun()
@@ -114,7 +114,7 @@ void EpollListen::ListenThreadFun()
 				}
 
 				ClientConnect(clientSocket, clientAddr.sin_addr.s_addr, ntohs(clientAddr.sin_port));
-				ClientBind(clientSocket);
+				ClientBindRecv(clientSocket);
 
 				LOGI("New Connect(%d) %s:%u", clientSocket, inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
 			}
@@ -155,18 +155,14 @@ void EpollTransmit::Terminate()
 	pEpollVec_.clear();
 }
 
-void EpollTransmit::ClientBind(int _socket)
+void EpollTransmit::ClientBindRecv(int _socket)
 {
-	LOGI(__FUNCTION__);
-
 	int index = _socket % ThreadCount_;
 	pEpollVec_[index]->RegRecv(_socket);
 }
 
 void EpollTransmit::ClientBindSend(int _socket)
 {
-	LOGI(__FUNCTION__);
-
 	int index = _socket % ThreadCount_;
 	pEpollVec_[index]->RegSend(_socket);
 }

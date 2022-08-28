@@ -20,7 +20,6 @@ void Process::AddProcess(int _socket)
 
 void Process::ProcessClientDataFun(int _socket)
 {
-
 	PClient client = pMediator_->GetClient(_socket);
 
 	if (client != nullptr)
@@ -42,6 +41,7 @@ void Process::ProcessClientDataFun(int _socket)
 		while (popCount > 0);
 
 		pMediator_->ClientSendData(_socket);
+		pMediator_->ClientBindRecv(_socket);
 
 		delete[] buf;
 	}

@@ -44,9 +44,14 @@ void Mediator::ClientSendData(int _socket)
 	pTransmit_->ClientBindSend(_socket);
 }
 
-void Mediator::ClientBind(int _socket)
+void Mediator::ClientBindRecv(int _socket)
 {
-	pTransmit_->ClientBind(_socket);
+	pTransmit_->ClientBindRecv(_socket);
+}
+
+void Mediator::ClientBindSend(int _socket)
+{
+	pTransmit_->ClientBindSend(_socket);
 }
 
 PClient Mediator::GetClient(int _socket)

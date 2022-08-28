@@ -30,7 +30,8 @@ public:
 	void ClientDisconnect(int _socket);
 	void ClientRecvData(int _socket);
 	void ClientSendData(int _socket);
-	void ClientBind(int _socket);
+	void ClientBindRecv(int _socket);
+	void ClientBindSend(int _socket);
 
 	PClient GetClient(int _socket);
 

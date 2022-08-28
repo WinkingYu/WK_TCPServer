@@ -61,7 +61,7 @@ public:
 	EpollListen(shared_ptr<Mediator> _pMediator);
 	virtual ~EpollListen();
 
-	void ClientBind(int _socket) override;
+	void ClientBindRecv(int _socket) override;
 
 private:
 	void ListenThreadFun() override;
@@ -80,7 +80,7 @@ public:
 	void Start(int _num);
 	void Terminate();
 
-	void ClientBind(int _socket) override;
+	void ClientBindRecv(int _socket) override;
 	void ClientBindSend(int _socket) override;
 
 private:
